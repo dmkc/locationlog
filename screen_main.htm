@@ -2,15 +2,14 @@
     <div data-bb-type="title" id="titlebar"
         data-bb-caption="Location data"
         data-bb-action-caption="Start"
-        onactionclick="window.app.toggle();">
+        onactionclick="window.App.toggle_logging();">
     </div>
 
-    <div data-bb-type="button">Settings</div>
+
+    <div data-bb-type="button" onclick="window.App.show_settings()">Settings</div>
 
     <div data-bb-type="round-panel"> 
-        <div data-bb-type="panel-header">Raw data</div>
+        <div data-bb-type="panel-header">Most recent data</div>
         <div id="output">{}</div>
     </div>
-
-
 </div>
