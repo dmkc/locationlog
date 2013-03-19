@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<widget xmlns:rim="http://www.blackberry.com/ns/widgets" id="locationTest" 
+        version="1.0.1" rim:header="RIM-Widget:rim/widget" 
+        xmlns="http://www.w3.org/ns/widgets">
+    <rim:navigation mode="focus" />
+    <name>locationtest</name>
+    <description>Locaiton test</description>
+
+    <author href="https://github.com/dmkc">Dmitry Kichenko</author>
+    <!--<icon src="images/icon.png" />-->
+
+    <content src="http://169.254.0.2:8000/index.htm" />
+    <access uri="http://169.254.0.2" subdomains="true" />
+
+    <feature id="blackberry.app"  required="true" />
+    <feature id="blackberry.system" required="true" version="1.0.0.0"/>
+    <feature id="blackberry.sensors" required="true" version="1.0.0.0"/>
+
+    <rim:permissions>
+        <rim:permit>access_shared</rim:permit>
+        <rim:permit>access_location_services</rim:permit>
+        <rim:permit>read_geolocation</rim:permit>
+    </rim:permissions>
+</widget>

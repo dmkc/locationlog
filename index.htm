@@ -1,0 +1,150 @@
+<!doctype html5>
+<html>
+    <head>
+        <title>locationtest</title>
+        <meta charset="UTF-8"> 
+        <link rel="stylesheet" type="text/css" href="style/style.css">
+        <link rel="stylesheet" type="text/css" href="bbui.css">
+
+		<script type="text/javascript" src="local:///chrome/webworks.js"></script>
+        <script src="bbui.js" type="text/javascript"></script>
+        <script src="js/jquery.js" type="text/javascript"></script>
+        <script src="js/underscore_1.4.3.js" type="text/javascript"></script>
+        <script src="js/backbone_0.9.9.js" type="text/javascript"></script>
+
+		<script type="text/javascript">
+            document.addEventListener('webworksready', 
+                function(e) 
+                {
+                    bb.init({
+                        actionBarDark: true,
+                        controlsDark: true,
+                        listsDark: true,
+                        ondomready: function() {
+                            window.app.init();
+                        }
+                    });
+                    console.log(blackberry);
+                    bb.pushScreen('screen_main.htm', 'main');
+                }, 
+                false);
+
+            window.app = {
+                ///// GLOBAL DATA
+                dom: {
+                    $output: undefined,
+                    $titlebar: undefined
+                },
+
+                data: {
+                    // Last compass reading
+                    azimuth: undefined,
+                    storage: window.localStorage,
+                    timer: undefined,
+                    frequency: 5000,
+
+                    callbacks: {
+                        compass_callback: undefined,
+                        log_data: undefined
+                    }
+                },
+
+                ///// METHODS
+                init: function() {
+                    // set up callbacks with the right context
+                    this.data.callbacks.compass_callback = $.proxy(this.compass_callback, this);
+                    this.data.callbacks.log_data = $.proxy(this.log_data, this);
+
+                    this.dom.$output = jQuery('#output');
+                    this.dom.$titlebar = jQuery('#titlebar')[0];
+
+                    // Ripple doesn't support sensor data, boo.
+                    if(blackberry.sensors !== undefined) {
+                        blackberry.sensors.setOptions("devicecompass", { 
+                            delay: this.data.frequency,
+                            background: true
+                        });
+
+                    }
+
+                },
+
+                start: function() {
+                    blackberry.event.addEventListener("devicecompass", 
+                        this.data.callbacks.compass_callback);
+
+                    this.data.timer = setInterval(
+                        this.data.callbacks.log_data, this.data.frequency)
+
+                    this.dom.$titlebar.setActionCaption("Stop");
+                },
+
+                stop: function() {
+                    blackberry.event.removeEventListener("devicecompass", 
+                        this.data.callbacks.compass_callback);
+
+                    clearInterval(this.data.timer);
+                    this.data.timer = undefined;
+
+                    this.dom.$titlebar.setActionCaption("Start");
+                },
+
+                toggle: function() {
+                    if(this.data.timer === undefined)
+                        this.start();
+                    else
+                        this.stop();
+                },
+
+
+                log_data: function() {
+                    navigator.geolocation.getCurrentPosition(
+                        $.proxy(this.geolocation_callback, this));
+                },
+
+                display_data: function(data) {
+                    this.dom.$output.html(JSON.stringify(data));
+                },
+
+                geolocation_callback: function(data) {
+                    var store_data = {
+                        coords: data.coords,
+                        azimuth: this.data.azimuth
+                    };
+
+                    this.data.storage.setItem(data.timestamp, 
+                        JSON.stringify(store_data));
+
+                    this.display_data(store_data);
+                },
+
+                compass_callback: function(data) {
+                    this.data.azimuth = data.value;
+                },
+
+                clear_data: function() {
+                    for(var i=0; i < this.data.storage.length; i++) {
+                        this.data.storage.removeItem(
+                            this.data.storage.key(i));
+                    }
+                },
+
+                // Return array of all data as a JSON string
+                get_all_data: function(){
+                    var data_string = "[";
+
+                    for(var i=0; i < this.data.storage.length; i++) {
+                        data_string += this.data.storage.getItem(
+                            this.data.storage.key(i));
+
+                        if(i !== this.data.storage.length-1)
+                            data_string += ",";
+                    }
+
+                    return data_string+']';
+                }
+            };
+		</script>
+    </head>
+    <body></body>
+</html>
