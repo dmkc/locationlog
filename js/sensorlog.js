@@ -9,7 +9,7 @@ window.SensorLog = {
 
         callbacks: {
             compass_callback: undefined,
-            log_data: undefined
+            get_gps_data: undefined
         }
     },
 
@@ -17,7 +17,7 @@ window.SensorLog = {
     init: function() {
         // set up callbacks with the right context
         this.data.callbacks.compass_callback = $.proxy(this.compass_callback, this);
-        this.data.callbacks.log_data = $.proxy(this.log_data, this);
+        this.data.callbacks.get_gps_data = $.proxy(this.get_gps_data, this);
 
         // Ripple doesn't support sensor data, boo.
         if(blackberry.sensors !== undefined) {
@@ -34,7 +34,7 @@ window.SensorLog = {
             this.data.callbacks.compass_callback);
 
         this.data.timer = setInterval(
-            this.data.callbacks.log_data, this.data.delay)
+            this.data.callbacks.get_gps_data, this.data.delay)
 
     },
 
@@ -46,6 +46,7 @@ window.SensorLog = {
         this.data.timer = undefined;
     },
 
+
     toggle: function() {
         if(this.data.timer === undefined)
             this.start();
@@ -54,21 +55,29 @@ window.SensorLog = {
     },
 
 
-    log_data: function() {
+    get_gps_data: function() {
         navigator.geolocation.getCurrentPosition(
-            $.proxy(this.geolocation_callback, this));
+            $.proxy(this.geolocation_callback, this),
+            function(err){
+                console.log("Problems with GPS:", err);
+            }, 
+            {
+                 maximumAge: this.data.delay,
+                 enableHighAccuracy: true
+            });
     },
 
     // Called when there's new GPS data
     geolocation_callback: function(data) {
         var store_data = {
+                timestamp: data.timestamp,
                 coords: data.coords,
                 azimuth: this.data.azimuth
             },
             data_string = JSON.stringify(store_data),
             data_event;
 
-        this.data.storage.setItem(data.timestamp, data_string);
+        this.data.storage.setItem(store_data.timestamp, data_string);
 
         data_event = new CustomEvent('SensorLog:new_data');
         data_event.data = data_string;

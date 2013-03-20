@@ -9,7 +9,7 @@
     <author href="https://github.com/dmkc">Dmitry Kichenko</author>
     <!--<icon src="images/icon.png" />-->
 
-    <content src="http://169.254.0.2:8000/index.htm" />
+    <content src="index.htm" />
     <access uri="http://169.254.0.2" subdomains="true" />
 
     <feature id="blackberry.app"  required="true" />
