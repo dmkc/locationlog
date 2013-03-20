@@ -27,6 +27,8 @@ window.SensorLog = {
             });
 
         }
+
+        return this;
     },
 
     start: function() {
@@ -80,7 +82,7 @@ window.SensorLog = {
         this.data.storage.setItem(store_data.timestamp, data_string);
 
         data_event = new CustomEvent('SensorLog:new_data');
-        data_event.data = data_string;
+        data_event.data = store_data;
 
         document.dispatchEvent(data_event);
     },
@@ -113,5 +115,16 @@ window.SensorLog = {
         var storage = this.data.storage;
 
         return storage.getItem(storage.key(storage.length-1));
+    },
+
+    all_data: function() {
+        var result = [], obj;
+        
+        for(var i=0; i < this.data.storage.length; i++) {
+            obj = JSON.parse(this.data.storage.getItem(this.data.storage.key(i)));
+            result.push(obj);
+        }
+
+        return result;
     }
 };

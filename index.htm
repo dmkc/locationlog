@@ -58,12 +58,15 @@
 
                 init: function() {  
                     var that = this;
-                    SensorLog.init();  
+
+                    this.sensor_log = SensorLog.init();  
 
                     this.dom.$output = jQuery('#output');
-                    this.dom.$titlebar = jQuery('#titlebar')[0];
+                    this.dom.$titlebar = jQuery('#titlebar');
+                    this.dom.$data_table = jQuery('#data_table>tbody');
 
-                    this.show_data(SensorLog.latest_data());
+                    //this.show_data(this.sensor_log.latest_data());
+                    this.generate_data_table(this.sensor_log.all_data());
                     
                     document.addEventListener('SensorLog:new_data', function(e) {
                         that.show_data(e.data);
@@ -72,17 +75,48 @@
 
                 toggle_logging: function() {
                     SensorLog.toggle();
-
                     if (SensorLog.data.timer === undefined) {
-                        this.dom.$titlebar.setActionCaption("Start");
+                        this.dom.$titlebar[0].setActionCaption("Start");
 
                     } else {
-                        this.dom.$titlebar.setActionCaption("Stop");
+                        this.dom.$titlebar[0].setActionCaption("Stop");
                     }
                 },
 
                 show_data: function(data) {
                     this.dom.$output.html(data);
+                    this.dom.$data_table[0].insertBefore(
+                        this.generate_table_row(data),
+                        this.dom.$data_table[0].rows[0]);
+                },
+
+                generate_data_table: function(data) {
+                    var row, cell;
+
+                    for(var i=0; i<data.length; i++) {
+                        if(data[i].coords === undefined) continue;
+
+                        row = this.generate_table_row(data[i]);
+                        this.dom.$data_table[0].appendChild(row);
+                    }
+                },
+
+                generate_table_row: function(data) {
+                    var row, cell;
+                    row = document.createElement('tr');
+                        
+                    cell = document.createElement('td');
+                    cell.innerHTML = data.coords.latitude;
+                    row.appendChild(cell);
+
+                    cell = document.createElement('td');
+                    cell.innerHTML = data.coords.longitude;
+                    row.appendChild(cell);
+
+                    cell = document.createElement('td');
+                    cell.innerHTML = data.comment;
+
+                    return row;
                 },
 
                 ////////// Helper methods
@@ -92,11 +126,17 @@
 
                 load_settings: function(screen) {
                     $(screen).find('#settings_delay').val(SensorLog.data.delay);
+
+                    this.settings = SettingsController.init(screen);
+                    //this.settings.generate_data_table(SensorLog.all_data());
                 },
 
                 save_settings: function(){
                     SensorLog.data.delay = Number($('#settings_delay').val());
+
+                    delete this.settings;
                 },
+
                 clear_data: function() {
                     SensorLog.clear_data();
                 },
@@ -105,6 +145,44 @@
                     alert(SensorLog.data_as_string());
                 },
 
+            }
+
+            window.SettingsController = {
+                dom: {
+                    data_table: undefined
+                },
+
+                init: function(screen){
+                    this.context = screen;
+                    this.dom_init();
+                    return this;
+                },
+
+                dom_init: function() {
+                    this.dom.data_table = $(this.context).find('tbody');
+                },
+
+                generate_data_table: function(data) {
+                    var row, cell;
+
+                    for(var i=0; i<data.length; i++) {
+                        d = data[i].coords;
+                        row = document.createElement('tr');
+                        
+                        cell = document.createElement('td');
+                        cell.innerHTML = d.latitude;
+                        row.appendChild(cell);
+
+                        cell = document.createElement('td');
+                        cell.innerHTML = d.longitude;
+                        row.appendChild(cell);
+
+                        cell = document.createElement('td');
+                        cell.innerHTML = d.comment;
+                        
+                        this.dom.data_table[0].appendChild(row);
+                    }
+                }
             }
 		</script>
     </head>
