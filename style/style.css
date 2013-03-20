@@ -5,13 +5,21 @@
 }
 
 #data_table {
-    font-size: 100%;
+    font-size: 60%;
     border-collapse: collapse;
     width: 100%;
 }
 
 #data_table td {
-    border: 1px solid #999;
+    border: 1px solid #ccc;
+}
+
+#data_table thead {
+    font-weight: bold;
+}
+
+#data_table tbody {
+    color: #555;
 }
 
 // Various helpers

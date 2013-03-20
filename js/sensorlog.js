@@ -6,6 +6,7 @@ window.SensorLog = {
         storage: window.localStorage,
         timer: undefined,
         delay: 5000,
+        comment: 'N/A',
 
         callbacks: {
             compass_callback: undefined,
@@ -69,12 +70,17 @@ window.SensorLog = {
             });
     },
 
+    set_comment: function(comment) {
+        this.data.comment = comment;
+    },
+
     // Called when there's new GPS data
     geolocation_callback: function(data) {
         var store_data = {
                 timestamp: data.timestamp,
                 coords: data.coords,
-                azimuth: this.data.azimuth
+                azimuth: this.data.azimuth,
+                comment: this.data.comment
             },
             data_string = JSON.stringify(store_data),
             data_event;
